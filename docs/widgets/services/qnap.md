@@ -3,14 +3,16 @@ title: QNAP
 description: QNAP Widget Configuration
 ---
 
+Learn more about [QNAP](https://www.qnap.com).
+
 Allowed fields: `["cpuUsage", "memUsage", "systemTempC", "poolUsage", "volumeUsage"]`.
 
 ```yaml
 widget:
-    type: qnap
-    url: http://qnap.host.or.ip:port
-    username: user
-    password: pass
+  type: qnap
+  url: http://qnap.host.or.ip:port
+  username: user
+  password: pass
 ```
 
 If the QNAP device has multiple volumes, the _poolUsage_ will be a sum of all volumes.

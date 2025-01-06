@@ -27,7 +27,7 @@ export default function Component({ service }) {
 
   const params = {
     convert: `${currencyCode}`,
-  }
+  };
 
   // slugs >> symbols, not both
   if (slugs?.length) {
@@ -59,11 +59,13 @@ export default function Component({ service }) {
   }
 
   const { data } = statsData;
-  const validCryptos = Object.values(data).filter(crypto => crypto.quote[currencyCode][`percent_change_${dateRange}`] !== null)
+  const validCryptos = Object.values(data).filter(
+    (crypto) => crypto.quote[currencyCode][`percent_change_${dateRange}`] !== null,
+  );
 
   return (
     <Container service={service}>
-      <div className={classNames(service.description ? "-top-10" : "-top-8", "absolute right-1")}>
+      <div className={classNames(service.description ? "-top-10" : "-top-8", "absolute right-1 z-20")}>
         <Dropdown options={dateRangeOptions} value={dateRange} setValue={setDateRange} />
       </div>
 
@@ -84,9 +86,7 @@ export default function Component({ service }) {
               </div>
               <div
                 className={`font-bold w-10 mr-2 ${
-                  crypto.quote[currencyCode][`percent_change_${dateRange}`] > 0
-                    ? "text-emerald-300"
-                    : "text-rose-300"
+                  crypto.quote[currencyCode][`percent_change_${dateRange}`] > 0 ? "text-emerald-300" : "text-rose-300"
                 }`}
               >
                 {crypto.quote[currencyCode][`percent_change_${dateRange}`].toFixed(2)}%

@@ -1,84 +1,95 @@
 import { useTranslation } from "next-i18next";
 
-import Error from "../components/error";
 import Container from "../components/container";
 import Block from "../components/block";
 
 import useWidgetAPI from "utils/proxy/use-widget-api";
 
-
 function Swap({ quicklookData, className = "" }) {
   const { t } = useTranslation();
 
-  return quicklookData && quicklookData.swap !== 0 && (
-    <div className="text-xs flex place-content-between">
-      <div className={className}>{t("glances.swap")}</div>
-      <div className={className}>
-        {t("common.number", {
-          value: quicklookData.swap,
-          style: "unit",
-          unit: "percent",
-          maximumFractionDigits: 0,
-        })}
+  return (
+    quicklookData &&
+    quicklookData.swap !== 0 && (
+      <div className="text-xs flex place-content-between">
+        <div className={className}>{t("glances.swap")}</div>
+        <div className={className}>
+          {t("common.number", {
+            value: quicklookData.swap,
+            style: "unit",
+            unit: "percent",
+            maximumFractionDigits: 0,
+          })}
+        </div>
       </div>
-    </div>
+    )
   );
 }
 
 function CPU({ quicklookData, className = "" }) {
   const { t } = useTranslation();
 
-  return quicklookData && quicklookData.cpu && (
-    <div className="text-xs flex place-content-between">
-      <div className={className}>{t("glances.cpu")}</div>
-      <div className={className}>
-        {t("common.number", {
-          value: quicklookData.cpu,
-          style: "unit",
-          unit: "percent",
-          maximumFractionDigits: 0,
-        })}
+  return (
+    quicklookData &&
+    quicklookData.cpu && (
+      <div className="text-xs flex place-content-between">
+        <div className={className}>{t("glances.cpu")}</div>
+        <div className={className}>
+          {t("common.number", {
+            value: quicklookData.cpu,
+            style: "unit",
+            unit: "percent",
+            maximumFractionDigits: 0,
+          })}
+        </div>
       </div>
-    </div>
+    )
   );
 }
 
 function Mem({ quicklookData, className = "" }) {
   const { t } = useTranslation();
 
-  return quicklookData && quicklookData.mem && (
-    <div className="text-xs flex place-content-between">
-      <div className={className}>{t("glances.mem")}</div>
-      <div className={className}>
-        {t("common.number", {
-          value: quicklookData.mem,
-          style: "unit",
-          unit: "percent",
-          maximumFractionDigits: 0,
-        })}
+  return (
+    quicklookData &&
+    quicklookData.mem && (
+      <div className="text-xs flex place-content-between">
+        <div className={className}>{t("glances.mem")}</div>
+        <div className={className}>
+          {t("common.number", {
+            value: quicklookData.mem,
+            style: "unit",
+            unit: "percent",
+            maximumFractionDigits: 0,
+          })}
+        </div>
       </div>
-    </div>
+    )
   );
 }
 
+const defaultInterval = 1000;
+const defaultSystemInterval = 30000; // This data (OS, hostname, distribution) is usually super stable.
+
 export default function Component({ service }) {
   const { widget } = service;
-  const { chart } = widget;
+  const { chart, refreshInterval = defaultInterval, version = 3 } = widget;
 
-  const { data: quicklookData, errorL: quicklookError } = useWidgetAPI(service.widget, 'quicklook', {
-    refreshInterval: 1000,
+  const { data: quicklookData, errorL: quicklookError } = useWidgetAPI(service.widget, `${version}/quicklook`, {
+    refreshInterval,
   });
 
-  const { data: systemData, errorL: systemError } = useWidgetAPI(service.widget, 'system', {
-    refreshInterval: 30000,
+  const { data: systemData, errorL: systemError } = useWidgetAPI(service.widget, `${version}/system`, {
+    refreshInterval: defaultSystemInterval,
   });
 
-  if (quicklookError) {
-    return <Container chart={chart}><Error error={quicklookError} /></Container>;
+  if (quicklookError || (quicklookData && quicklookData.error)) {
+    const qlError = quicklookError || quicklookData.error;
+    return <Container error={qlError} widget={widget} />;
   }
 
   if (systemError) {
-    return <Container chart={chart}><Error error={systemError} /></Container>;
+    return <Container error={systemError} service={service} />;
   }
 
   const dataCharts = [];
@@ -95,61 +106,48 @@ export default function Component({ service }) {
     });
   }
 
-
   return (
-    <Container chart={chart} className="bg-gradient-to-br from-theme-500/30 via-theme-600/20 to-theme-700/10">
-      <Block position="top-3 right-3">
+    <Container chart={chart}>
+      {chart && (
+        <div className="bg-gradient-to-br from-theme-500/30 via-theme-600/20 to-theme-700/10 absolute -top-10 -left-2 -right-2 -bottom-2 h-[calc(100%+3em)] w-[calc(100%+1em)]" />
+      )}
+
+      <Block position="-top-6 right-2">
         {quicklookData && quicklookData.cpu_name && chart && (
+          <div className="text-[0.6rem] opacity-50">{quicklookData.cpu_name}</div>
+        )}
+
+        {!chart && quicklookData?.swap === 0 && (
           <div className="text-[0.6rem] opacity-50">
-            {quicklookData.cpu_name}
+            {systemData && systemData.linux_distro && `${systemData.linux_distro} - `}
+            {systemData && systemData.os_version}
           </div>
         )}
 
-        { !chart && quicklookData?.swap === 0 && (
-          <div className="text-[0.6rem] opacity-50">
-            {quicklookData.cpu_name}
-          </div>
-        )}
-
-        <div className="w-[4rem]">
-          { !chart && <Swap quicklookData={quicklookData} className="opacity-25" /> }
-        </div>
+        <div className="w-[4rem]">{!chart && <Swap quicklookData={quicklookData} className="opacity-25" />}</div>
       </Block>
 
-
       {chart && (
-        <Block position="bottom-3 left-3">
-          {systemData && systemData.linux_distro && (
-            <div className="text-xs opacity-50">
-              {systemData.linux_distro}
-            </div>
-          )}
-          {systemData && systemData.os_version && (
-            <div className="text-xs opacity-50">
-              {systemData.os_version}
-            </div>
-          )}
-          {systemData && systemData.hostname && (
-            <div className="text-xs opacity-75">
-              {systemData.hostname}
-            </div>
-          )}
+        <Block position="bottom-3 left-2">
+          {systemData && systemData.linux_distro && <div className="text-xs opacity-50">{systemData.linux_distro}</div>}
+          {systemData && systemData.os_version && <div className="text-xs opacity-50">{systemData.os_version}</div>}
+          {systemData && systemData.hostname && <div className="text-xs opacity-75">{systemData.hostname}</div>}
         </Block>
       )}
 
       {!chart && (
-        <Block position="bottom-3 left-3 w-[3rem]">
+        <Block position="bottom-3 left-3 w-[4rem]">
           <CPU quicklookData={quicklookData} className="opacity-75" />
         </Block>
       )}
 
-      <Block position="bottom-3 right-3 w-[4rem]">
-        { chart && <CPU quicklookData={quicklookData} className="opacity-50" /> }
+      <Block position="bottom-3 right-2 w-[4rem]">
+        {chart && <CPU quicklookData={quicklookData} className="opacity-50" />}
 
-        { chart && <Mem quicklookData={quicklookData} className="opacity-50" /> }
-        { !chart && <Mem quicklookData={quicklookData} className="opacity-75" /> }
+        {chart && <Mem quicklookData={quicklookData} className="opacity-50" />}
+        {!chart && <Mem quicklookData={quicklookData} className="opacity-75" />}
 
-        { chart && <Swap quicklookData={quicklookData} className="opacity-50" /> }
+        {chart && <Swap quicklookData={quicklookData} className="opacity-50" />}
       </Block>
     </Container>
   );

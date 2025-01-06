@@ -8,8 +8,7 @@ export default function Component({ service }) {
   const { t } = useTranslation();
 
   const { widget } = service;
-  const { data: resultData, error: resultError } = useWidgetAPI(widget, "result");
-
+  const { data: resultData, error: resultError } = useWidgetAPI(widget, "upstreams");
 
   if (resultError) {
     return <Container service={service} error={resultError} />;
@@ -17,7 +16,7 @@ export default function Component({ service }) {
 
   if (!resultData) {
     return (
-      <Container service={service}>,
+      <Container service={service}>
         <Block label="caddy.upstreams" />
         <Block label="caddy.requests" />
         <Block label="caddy.requests_failed" />

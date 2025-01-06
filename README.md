@@ -14,13 +14,22 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/benphelps/homepage/actions/workflows/docker-publish.yml"><img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/benphelps/homepage/docker-publish.yml"></a>
+  <a href="https://github.com/gethomepage/homepage/actions/workflows/docker-publish.yml"><img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/gethomepage/homepage/docker-publish.yml"></a>
   &nbsp;
-  <a href="https://hosted.weblate.org/engage/homepage/"><img src="https://hosted.weblate.org/widgets/homepage/-/homepage/svg-badge.svg" alt="Weblate"></a>
+  <a href="https://crowdin.com/project/gethomepage" target="_blank"><img src="https://badges.crowdin.net/gethomepage/localized.svg"></a>
   &nbsp;
   <a href="https://discord.gg/k4ruYNrudu"><img alt="Discord" src="https://img.shields.io/discord/1019316731635834932"></a>
   &nbsp;
+  <a href="https://gethomepage.dev/" title="Docs"><img title="Docs" src="https://github.com/gethomepage/homepage/actions/workflows/docs-publish.yml/badge.svg"/></a>
+  &nbsp;
   <a href="https://paypal.me/phelpsben" title="Donate"><img alt="GitHub Sponsors" src="https://img.shields.io/github/sponsors/benphelps"></a>
+</p>
+
+<p align="center">
+  <a href="https://www.digitalocean.com/?refcode=df14bcb7c016&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge"><img src="https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg" alt="DigitalOcean Referral Badge" /></a>
+</p>
+<p align="center">
+<em>Homepage builds are kindly powered by DigitalOcean.</em>
 </p>
 
 # Features
@@ -39,37 +48,40 @@ With features like quick search, bookmarks, weather support, a wide range of int
 
 ## Docker Integration
 
-Homepage has built-in support for Docker, and can automatically discover and add services to the homepage based on labels. See the [Docker](https://gethomepage.dev/en/installation/docker/) page for more information.
+Homepage has built-in support for Docker, and can automatically discover and add services to the homepage based on labels. See the [Docker Service Discovery](https://gethomepage.dev/configs/docker/#automatic-service-discovery) page for more information.
 
 ## Service Widgets
 
-Homepage also has support for over 100 3rd party services, including all popular starr apps, and most popular self-hosted apps. Some examples include: Radarr, Sonarr, Lidarr, Bazarr, Ombi, Tautulli, Plex, Jellyfin, Emby, Transmission, qBittorrent, Deluge, Jackett, NZBGet, SABnzbd, etc. As well as service integrations, Homepage also has a number of information providers, sourcing information from a variety of external 3rd party APIs. See the [Service](https://gethomepage.dev/en/configs/service-widgets/) page for more information.
+Homepage also has support for hundreds of 3rd-party services, including all popular \*arr apps, and most popular self-hosted apps. Some examples include: Radarr, Sonarr, Lidarr, Bazarr, Ombi, Tautulli, Plex, Jellyfin, Emby, Transmission, qBittorrent, Deluge, Jackett, NZBGet, SABnzbd, etc. As well as service integrations, Homepage also has a number of information providers, sourcing information from a variety of external 3rd-party APIs. See the [Service](https://gethomepage.dev/widgets/) page for more information.
 
 ## Information Widgets
 
-Homepage has built-in support for a number of information providers, including weather, time, date, search, glances and more. System and status information presented at the top of the page. See the [Information Providers](https://gethomepage.dev/en/configs/widgets/) page for more information.
+Homepage has built-in support for a number of information providers, including weather, time, date, search, glances and more. System and status information presented at the top of the page. See the [Information Providers](https://gethomepage.dev/widgets/) page for more information.
 
 ## Customization
 
-Homepage is highly customizable, with support for custom themes, custom CSS & JS, custom layouts, formatting, localization and more. See the [Settings](https://gethomepage.dev/en/configs/settings/) page for more information.
+Homepage is highly customizable, with support for custom themes, custom CSS & JS, custom layouts, formatting, localization and more. See the [Settings](https://gethomepage.dev/configs/settings/) page for more information.
 
 # Getting Started
 
 For configuration options, examples and more, [please check out the homepage documentation](http://gethomepage.dev).
+
+## Security Notice 🔒
+
+Please note that when using features such as widgets, Homepage can access personal information (for example from your home automation system) and Homepage currently does not (and is not planned to) include any authentication layer itself. Thus, we recommend homepage be deployed behind a reverse proxy including authentication, SSL etc, and / or behind a VPN.
 
 ## With Docker
 
 Using docker compose:
 
 ```yaml
-version: "3.3"
 services:
   homepage:
-    image: ghcr.io/benphelps/homepage:latest
+    image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     environment:
-      PUID: 1000 -- optional, your user id
-      PGID: 1000 -- optional, your group id
+      PUID: 1000 # optional, your user id
+      PGID: 1000 # optional, your group id
     ports:
       - 3000:3000
     volumes:
@@ -88,15 +100,15 @@ docker run --name homepage \
   -v /path/to/config:/app/config \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   --restart unless-stopped \
-  ghcr.io/benphelps/homepage:latest
+  ghcr.io/gethomepage/homepage:latest
 ```
 
-## With Node
+## From Source
 
 First, clone the repository:
 
 ```bash
-git clone https://github.com/benphelps/homepage.git
+git clone https://github.com/gethomepage/homepage.git
 ```
 
 Then install dependencies and build the production bundle (I'm using pnpm here, you can use npm or yarn if you like):
@@ -114,15 +126,9 @@ Finally, run the server in production mode:
 pnpm start
 ```
 
-or development mode:
-
-```bash
-pnpm dev
-```
-
 # Configuration
 
-Please refere to the [homepage documentation](https://gethomepage.dev/) website for more information. Everything you need to know about configuring Homepage is there. Please read everything carefully before asking for help, as most questions are answered there or are simple YAML configuration issues.
+Please refer to the [homepage documentation website](https://gethomepage.dev/) for more information. Everything you need to know about configuring Homepage is there. Please read everything carefully before asking for help, as most questions are answered there or are simple YAML configuration issues.
 
 # Development
 
@@ -144,6 +150,8 @@ This is a [Next.js](https://nextjs.org/) application, see their documentation fo
 
 # Documentation
 
+The homepage documentation is available at [https://gethomepage.dev/](https://gethomepage.dev/).
+
 Homepage uses Material for MkDocs for documentation. To run the documentation locally, first install the dependencies:
 
 ```bash
@@ -158,11 +166,13 @@ mkdocs serve # or build, to build the static site
 
 # Support & Suggestions
 
-If you have any questions, suggestions, or general issues, please start a discussion on the [Discussions](https://github.com/benphelps/homepage/discussions) page.
+If you have any questions, suggestions, or general issues, please start a discussion on the [Discussions](https://github.com/gethomepage/homepage/discussions) page.
 
-For bug reports, please open an issue on the [Issues](https://github.com/benphelps/homepage/issues) page.
+## Troubleshooting
 
-## Contributing & Contributers
+In addition to the docs, the [troubleshooting guide](https://gethomepage.dev/troubleshooting/) can help reveal many basic config or network issues. If you're having a problem, it's a good place to start.
+
+## Contributing & Contributors
 
 Contributions are welcome! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for more information.
 

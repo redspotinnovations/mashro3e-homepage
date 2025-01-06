@@ -8,10 +8,10 @@ import widgets from "widgets/widgets";
 const logger = createLogger("genericProxyHandler");
 
 export default async function genericProxyHandler(req, res, map) {
-  const { group, service, endpoint } = req.query;
+  const { group, service, endpoint, index } = req.query;
 
   if (group && service) {
-    const widget = await getServiceWidget(group, service);
+    const widget = await getServiceWidget(group, service, index);
 
     if (!widgets?.[widget.type]?.api) {
       return res.status(403).json({ error: "Service does not support API calls" });
@@ -19,10 +19,12 @@ export default async function genericProxyHandler(req, res, map) {
 
     if (widget) {
       // if there are more than one question marks, replace others to &
-      const url = new URL(formatApiCall(widgets[widget.type].api, { endpoint, ...widget }).replace(/(?<=\?.*)\?/g, '&'));
+      const url = new URL(
+        formatApiCall(widgets[widget.type].api, { endpoint, ...widget }).replace(/(?<=\?.*)\?/g, "&"),
+      );
 
-      const headers = req.extraHeaders ?? widget.headers ?? {};
-      
+      const headers = req.extraHeaders ?? widget.headers ?? widgets[widget.type].headers ?? {};
+
       if (widget.username && widget.password) {
         headers.Authorization = `Basic ${Buffer.from(`${widget.username}:${widget.password}`).toString("base64")}`;
       }
@@ -30,22 +32,30 @@ export default async function genericProxyHandler(req, res, map) {
       const params = {
         method: widget.method ?? req.method,
         headers,
-      }
+      };
       if (req.body) {
         params.body = req.body;
+      } else if (widget.requestBody) {
+        if (typeof widget.requestBody === "object") {
+          params.body = JSON.stringify(widget.requestBody);
+        } else {
+          params.body = widget.requestBody;
+        }
       }
 
       const [status, contentType, data] = await httpProxy(url, params);
 
       let resultData = data;
-      
+
       if (resultData.error?.url) {
         resultData.error.url = sanitizeErrorURL(url);
       }
-      
+
       if (status === 200) {
         if (!validateWidgetData(widget, endpoint, resultData)) {
-          return res.status(status).json({error: {message: "Invalid data", url: sanitizeErrorURL(url), data: resultData}});
+          return res
+            .status(status)
+            .json({ error: { message: "Invalid data", url: sanitizeErrorURL(url), data: resultData } });
         }
         if (map) resultData = map(resultData);
       }
@@ -62,10 +72,16 @@ export default async function genericProxyHandler(req, res, map) {
           status,
           url.protocol,
           url.hostname,
-          url.port ? `:${url.port}` : '',
-          url.pathname
+          url.port ? `:${url.port}` : "",
+          url.pathname,
         );
-        return res.status(status).json({error: {message: "HTTP Error", url: sanitizeErrorURL(url), resultData}});
+        return res.status(status).json({
+          error: {
+            message: "HTTP Error",
+            url: sanitizeErrorURL(url),
+            resultData: Buffer.isBuffer(resultData) ? Buffer.from(resultData).toString() : resultData,
+          },
+        });
       }
 
       return res.status(status).send(resultData);

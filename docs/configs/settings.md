@@ -13,6 +13,14 @@ You can customize the title of the page if you'd like.
 title: My Awesome Homepage
 ```
 
+## Description
+
+You can customize the description of the page if you'd like.
+
+```yaml
+description: A description of my awesome homepage
+```
+
 ## Start URL
 
 You can customize the start_url as required for installable apps. The default is "/".
@@ -67,7 +75,7 @@ background:
 
 ### Card Background Blur
 
-You can apply a blur filter to the service & bookmark cards. Note this option is incompatible with the backround blur, saturate and brightness filters.
+You can apply a blur filter to the service & bookmark cards. Note this option is incompatible with the background blur, saturate and brightness filters.
 
 ```yaml
 cardBlur: sm # sm, "", md, etc... see https://tailwindcss.com/docs/backdrop-blur
@@ -85,7 +93,7 @@ Or you may pass the path to a local image relative to the `/app/public` director
 
 ## Theme
 
-You can configure a fixed them (and disable the theme switcher) by passing the `theme` option, like so:
+You can configure a fixed theme (and disable the theme switcher) by passing the `theme` option, like so:
 
 ```yaml
 theme: dark # or light
@@ -118,6 +126,22 @@ As an example, this would produce the following layout:
 
 <img width="1260" alt="Screenshot 2022-09-15 at 8 03 57 PM" src="https://user-images.githubusercontent.com/82196/190466646-8ca94505-0fcf-4964-9687-3a6c7cd3144f.png">
 
+### Icons-Only Layout
+
+You can also specify the an icon-only layout for bookmarks, either like so:
+
+```yaml
+layout:
+  Media:
+    iconsOnly: true
+```
+
+or globally:
+
+```yaml
+bookmarksStyle: icons
+```
+
 ### Sorting
 
 Service groups and bookmark groups can be mixed in order, **but should use different group names**. If you do not specify any bookmark groups they will all show at the bottom of the page.
@@ -135,6 +159,27 @@ layout:
   - Configured3:
       style: row
       columns: 3
+```
+
+### Nested Groups
+
+If your services config has nested groups, you can apply settings to these groups by nesting them in the layout block
+and using the same settings. For example
+
+```yaml
+layout:
+  Group A:
+    style: row
+    columns: 4
+  Group C:
+    style: row
+    columns: 2
+    Nested Group A:
+      style: row
+      columns: 2
+    Nested Group B:
+      style: row
+      columns: 2
 ```
 
 ### Headers
@@ -211,13 +256,13 @@ layout:
 
 ### Five Columns
 
-You can add a fifth column (when `style: columns` which is default) by adding:
+You can add a fifth column to services (when `style: columns` which is default) by adding:
 
 ```yaml
 fiveColumns: true
 ```
 
-By default homepage will max out at 4 columns for column style
+By default homepage will max out at 4 columns for services with `columns` style
 
 ### Collapsible sections
 
@@ -228,6 +273,48 @@ disableCollapse: true
 ```
 
 By default the feature is enabled.
+
+### Initially collapsed sections
+
+You can initially collapse sections by adding the `initiallyCollapsed` option to the layout group.
+
+```yaml
+layout:
+  Section A:
+    initiallyCollapsed: true
+```
+
+This can also be set globaly using the `groupsInitiallyCollapsed` option.
+
+```yaml
+groupsInitiallyCollapsed: true
+```
+
+The value set on a group will overwrite the global setting.
+
+By default the feature is disabled.
+
+### Use Equal Height Cards
+
+You can enable equal height cards for groups of services, this will make all cards in a row the same height.
+
+Global setting in `settings.yaml`:
+
+```yaml
+useEqualHeights: true
+```
+
+Per layout group in `settings.yaml`:
+
+```yaml
+useEqualHeights: false
+layout:
+  ...
+  Group Name:
+    useEqualHeights: true # overrides global setting
+```
+
+By default the feature is disabled
 
 ## Header Style
 
@@ -306,12 +393,12 @@ This can also be set for individual services. Note setting this at the service l
 
 ## Providers
 
-The `providers` section allows you to define shared API provider options and secrets. Currently this allows you to define your weather API keys in secret and is also the location of the Longhorn URL and credentials.
+The `providers` section allows you to define shared API provider options and secrets.
 
 ```yaml
 providers:
   openweathermap: openweathermapapikey
-  weatherapi: weatherapiapikey
+  finnhub: yourfinnhubapikeyhere
   longhorn:
     url: https://longhorn.example.com
     username: admin
@@ -321,29 +408,43 @@ providers:
 You can then pass `provider` instead of `apiKey` in your widget configuration.
 
 ```yaml
-- weather:
+- openweathermap:
     latitude: 50.449684
     longitude: 30.525026
-    provider: weatherapi
+    provider: openweathermap
 ```
 
 ## Quick Launch
 
-You can use the 'Quick Launch' feature to search services, perform a web search or open a URL. To use Quick Launch, just start typing while on your homepage (as long as the search widget doesnt have focus).
+You can use the 'Quick Launch' feature to search services, perform a web search or open a URL. To use Quick Launch, just start typing while on your homepage (as long as the search widget doesn't have focus).
 
 <img width="1000" alt="quicklaunch" src="https://user-images.githubusercontent.com/4887959/216880811-90ff72cb-2990-4475-889b-7c3a31e6beef.png">
 
 There are a few optional settings for the Quick Launch feature:
 
-- `searchDescriptions`: which lets you control whether item descriptions are included in searches. This is off by default. When enabled, results that match the item name will be placed above those that only match the description.
+- `searchDescriptions`: which lets you control whether item descriptions are included in searches. This is false by default. When enabled, results that match the item name will be placed above those that only match the description.
 - `hideInternetSearch`: disable automatically including the currently-selected web search (e.g. from the widget) as a Quick Launch option. This is false by default, enabling the feature.
+- `showSearchSuggestions`: show search suggestions for the internet search. If this is not specified then the setting will be inherited from the search widget. If it is not specified there either, it will default to false. For custom providers the `suggestionUrl` needs to be set in order for this to work.
+- `provider`: search engine provider. If none is specified it will try to use the provider set for the Search Widget, if neither are present then internet search will be disabled.
 - `hideVisitURL`: disable detecting and offering an option to open URLs. This is false by default, enabling the feature.
 
 ```yaml
 quicklaunch:
   searchDescriptions: true
   hideInternetSearch: true
+  showSearchSuggestions: true
   hideVisitURL: true
+  provider: google # google, duckduckgo, bing, baidu, brave or custom
+```
+
+or for a custom search:
+
+```yaml
+quicklaunch:
+  provider: custom
+  url: https://www.ecosia.org/search?q=
+  target: _blank
+  suggestionUrl: https://ac.ecosia.org/autocomplete?type=list&q=
 ```
 
 ## Homepage Version
@@ -361,6 +462,8 @@ By default the homepage logfile is written to the a `logs` subdirectory of the `
 ```yaml
 logpath: /logfile/path
 ```
+
+By default, logs are sent both to `stdout` and to a file at the path specified. This can be changed by setting the `LOG_TARGETS` environment variable to one of `both` (default), `stdout` or `file`.
 
 ## Show Docker Stats
 
@@ -380,6 +483,40 @@ or per-service (`services.yaml`) with:
 
 If you have both set the per-service settings take precedence.
 
+## Status Style
+
+You can choose from the following styles for docker or k8s status, site monitor and ping: `dot` or `basic`
+
+- The default is no value, and displays the monitor and ping response time in ms and the docker / k8s container status
+- `dot` shows a green dot for a successful monitor ping or healthy status.
+- `basic` shows either UP or DOWN for monitor & ping
+
+For example:
+
+```yaml
+statusStyle: "dot"
+```
+
+or per-service (`services.yaml`) with:
+
+```yaml
+- Example Service:
+    ...
+    statusStyle: 'dot'
+```
+
+If you have both set, the per-service settings take precedence.
+
+## Instance Name
+
+Name used by automatic docker service discovery to differentiate between multiple homepage instances.
+
+For example:
+
+```yaml
+instanceName: public
+```
+
 ## Hide Widget Error Messages
 
 Hide the visible API error messages either globally in `settings.yaml`:
@@ -398,4 +535,4 @@ or per service widget (`services.yaml`) with:
         hideErrors: true
 ```
 
-If either value is set to true, the errror message will be hidden.
+If either value is set to true, the error message will be hidden.

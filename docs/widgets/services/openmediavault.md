@@ -3,15 +3,17 @@ title: OpenMediaVault
 description: OpenMediaVault Widget Configuration
 ---
 
+Learn more about [OpenMediaVault](https://www.openmediavault.org/).
+
 Provides useful information from your OpenMediaVault
 
 ```yaml
 widget:
-    type: openmediavault
-    url: http://omv.host.or.ip
-    username: admin
-    password: pass
-    method: services.getStatus # required
+  type: openmediavault
+  url: http://omv.host.or.ip
+  username: admin
+  password: pass
+  method: services.getStatus # required
 ```
 
 ## Methods
